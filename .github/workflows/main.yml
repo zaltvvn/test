@@ -2,9 +2,7 @@ name: ▶️ Playlist Grabber
 
 on:
   schedule:
-    # ⏰ UTC (VN = UTC+7)
-    - cron: "00 18 * * *" # 01:00 VN
-    - cron: "00 21 * * *" # 04:00 VN (backup)
+    - cron: '*/10 * * * *'  # Runs every 10 minutes
   workflow_dispatch: {}
 
 permissions:
