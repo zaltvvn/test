@@ -2,8 +2,8 @@ name: Daily Playlist Generator
 
 on:
   schedule:
-    - cron: '*/10 * * * *'
-  workflow_dispatch:
+    - cron: "*/10 * * * *" # Runs every 10 minutes
+  workflow_dispatch: # Optional: Allows manual trigger
 
 jobs:
   generate-playlist:
@@ -27,6 +27,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          python -m pip install --upgrade pip
           pip install requests certifi
 
       - name: Run playlist engine
