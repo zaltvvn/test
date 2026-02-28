@@ -30,6 +30,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests certifi
 
+      - name: Create docs directory if it doesn't exist
+        run: mkdir -p docs
+
       - name: Run playlist engine
         run: |
           python engine/script.py
