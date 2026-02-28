@@ -1,0 +1,51 @@
+name: Daily Playlist Generator
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate-playlist:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout test repo
+        uses: actions/checkout@v4
+
+      - name: Checkout engine repo
+        uses: actions/checkout@v4
+        with:
+          repository: zaltvvn/engine
+          path: engine
+          token: ${{ secrets.ENGINE_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+
+      - name: Install dependencies
+        run: |
+          pip install requests certifi
+
+      - name: Run playlist engine
+        run: |
+          python engine/script.py
+
+      - name: Commit and push generated playlist
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          git add docs/combined_playlist.m3u docs/.nojekyll
+
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update combined playlist"
+            git push
+          fi
