@@ -1,0 +1,48 @@
+name: Auto clean old commits (gen-playlist)
+
+on:
+  schedule:
+    - cron: '0 0 * * *'   # chạy mỗi ngày lúc 00:00 UTC
+  workflow_dispatch:
+
+jobs:
+  clean_commits:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # cho phép push
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # lấy full history
+
+      - name: Configure git
+        run: |
+          git config user.name "auto-clean-bot"
+          git config user.email "auto-clean@users.noreply.github.com"
+
+      - name: Backup branch
+        run: |
+          git branch backup-before-clean-$(date +%Y%m%d%H%M%S)
+
+      - name: Clean commits older than 3 days
+        run: |
+          BRANCH="main"
+          DAYS=3
+
+          git checkout $BRANCH
+
+          COMMIT=$(git rev-list -n 1 --before="$DAYS days ago" $BRANCH)
+
+          if [ -z "$COMMIT" ]; then
+            echo "No commit older than $DAYS days. Skip."
+            exit 0
+          fi
+
+          echo "Reset to commit: $COMMIT"
+          git reset --hard $COMMIT
+
+      - name: Force push
+        run: |
+          git push --force
